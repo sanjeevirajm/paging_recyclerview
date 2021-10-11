@@ -7,13 +7,17 @@ Pagination can be done in multiple ways in recycler view
 
   We will add onScrollListerenr and it will check whether the user has scrolled to the last position.
   If the last position is reached, we will show the progress bar and start fetching next page.
+
   Concern: 
+
   *Placing progress bar in bottom is not a good idea. When the user scrolls to last position and scrolls again to top, the progress bar will overlap with recyclerview items. We can write code to handle it, but it will get complicated.
 
 2. onScrollListener and progress bar item inside recyclerview.
 
   It's same as above. But the progress bar issue is avoided by adding progress bar as a item in recyclerview adapter.
+
   Concern: 
+
   *Adding another item in recyclerview adapter requires changes in multiple places. We need to make the adapter list nullable and add null check in multiple places. We will lose null safety. There is another approach to make it null safety. But it requires more changes.
 
 3. Just Progress bar item inside RecyclerView
