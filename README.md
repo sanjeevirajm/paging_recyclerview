@@ -28,12 +28,20 @@ The only disadvantage is it's super complex. It might be useful if the list is h
 5. PagedAdapter
 
 *It does pre fetching, and it can be customised. And the pre-fetching trigger technique is better than Android's Paging library.
+
 *It uses DiffUtil, the diff runs in background
- *No internet connection case is handled with retry option
- *Progress bar will automatically align to the center of the screen if there is only one item on the screen
- *LoadingView can be customized
- *Duplicate loadMore call won't be made
- *How to use PagedAdapter? - Just extend PagedAdapter, IDE will ask to override some methods, do it. That's all.
- *Don't call notify methods like notifyDataSetChanged, notifyItemChanged, etc.. Instead use updateList() method.
+
+*No internet connection case is handled with retry option
+
+*Progress bar will automatically align to the center of the screen if there is only one item on the screen
+
+*LoadingView can be customized
+
+*Duplicate loadMore call won't be made
+
+*How to use PagedAdapter? - Just extend PagedAdapter, IDE will ask to override some methods, do it. That's all.
+
+*Don't call notify methods like notifyDataSetChanged, notifyItemChanged, etc.. Instead use updateList() method.
+
 Note: updateList() method should be called every time when response is received. No matter the response is success or failure.
 
