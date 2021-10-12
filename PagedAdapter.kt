@@ -160,7 +160,7 @@ abstract class PagedAdapter<T>(
     }
 }
 
-abstract class PagedDiffCallback<T: DataHelper> {
+abstract class PagedDiffCallback<T> {
     abstract fun areItemsTheSame(oldItem: T, newItem: T): Boolean
 
     abstract fun areContentsTheSame(oldItem: T, newItem: T): Boolean
