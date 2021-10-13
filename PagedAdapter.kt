@@ -12,10 +12,10 @@ import com.example.recyclersample.R
 import com.example.recyclersample.Util
 import kotlinx.coroutines.*
 
-abstract class PagedAdapter<T>(
+abstract class PagedAdapter<ModelType, ViewHolderType: RecyclerView.ViewHolder>(
     private val context: Context,
     private val coroutineScope: CoroutineScope,
-    private val diffCallback: DiffUtil.ItemCallback<T>,
+    private val diffCallback: DiffUtil.ItemCallback<ModelType>,
     private var prefetchTriggerCount: Int = 25): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -24,8 +24,8 @@ abstract class PagedAdapter<T>(
 
     abstract fun getViewTypeForPosition(position: Int): Int
     abstract fun loadMore(position: Int)
-    abstract fun onCreateViewHolderDelegate(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
-    abstract fun onBindViewHolderDelegate(holder: RecyclerView.ViewHolder, position: Int)
+    abstract fun onCreateViewHolderDelegate(parent: ViewGroup, viewType: Int): ViewHolderType
+    abstract fun onBindViewHolderDelegate(holder: ViewHolderType, position: Int)
 
     private var hasNextPage: Boolean = false
     private var calledLoadMorePosition = -1
@@ -78,14 +78,14 @@ abstract class PagedAdapter<T>(
             if (hasNextPage && position >= itemCount - (prefetchTriggerCount + 1)) {
                 checkAndCallLoadMore(itemCount - 1)
             }
-            onBindViewHolderDelegate(holder, position)
+            onBindViewHolderDelegate(holder as ViewHolderType, position)
         }
     }
 
-    private var list = emptyList<T>()
+    private var list = emptyList<ModelType>()
     private var diffJob: Job? = null
 
-    fun getItem(position: Int): T {
+    fun getItem(position: Int): ModelType {
         return list[position]
     }
 
@@ -93,8 +93,8 @@ abstract class PagedAdapter<T>(
         updateList(list, hasNext)
     }
 
-    fun updateList(newList: List<T>, hasNextPageNewValue: Boolean) {
-        val updatedList: List<T> = ArrayList(newList)
+    fun updateList(newList: List<ModelType>, hasNextPageNewValue: Boolean) {
+        val updatedList: List<ModelType> = ArrayList(newList)
         diffJob?.cancel()
         diffJob = coroutineScope.launch(Dispatchers.Default) {
             val diffCallbackWithLoader: DiffUtil.Callback = object: DiffUtil.Callback() {
@@ -160,7 +160,7 @@ abstract class PagedAdapter<T>(
 
 class LoadingViewHolder(itemView: View,
                         private val context: Context,
-                        private val pagedAdapter: PagedAdapter<*>) : RecyclerView.ViewHolder(itemView) {
+                        private val pagedAdapter: PagedAdapter<*,*>) : RecyclerView.ViewHolder(itemView) {
     private val progressBar: ProgressBar = itemView.findViewById(R.id.progressBar)
     private val retryTextView: AppCompatTextView = itemView.findViewById(R.id.textViewRetry)
 
