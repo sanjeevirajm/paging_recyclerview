@@ -1,19 +1,24 @@
+package com.example.recyclersample.flowerList
+
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.DiffUtil
-import paging.utils.*
+import androidx.recyclerview.widget.RecyclerView
+import com.example.recyclersample.R
+import com.example.recyclersample.Util
 import kotlinx.coroutines.*
 
 abstract class PagedAdapter<T>(
-    val context: Context,
+    private val context: Context,
     private val coroutineScope: CoroutineScope,
-    private val pagedDiffCallback: PagedDiffCallback<T>,
-    private var prefetchTriggerCount: Int = 25): Recycler.Adapter<ViewHolder>() {
+    private val diffCallback: DiffUtil.ItemCallback<T>,
+    private var prefetchTriggerCount: Int = 25): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         const val TYPE_LOADER = 55555
@@ -21,20 +26,19 @@ abstract class PagedAdapter<T>(
 
     abstract fun getViewTypeForPosition(position: Int): Int
     abstract fun loadMore(position: Int)
-    abstract fun onCreateViewHolderDelegate(parent: ViewGroup, viewType: Int): ViewHolder
-    abstract fun onBindViewHolderDelegate(holder: GeneralViewHolder, position: Int)
+    abstract fun onCreateViewHolderDelegate(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
+    abstract fun onBindViewHolderDelegate(holder: RecyclerView.ViewHolder, position: Int)
 
     private var hasNextPage: Boolean = false
     private var calledLoadMorePosition = -1
 
     fun checkAndCallLoadMore(position: Int, skipCheck: Boolean = false) {
-        log = "skipCheck: $skipCheck, calledLoadMorePosition: $calledLoadMorePosition, position: $position"
         if (skipCheck || calledLoadMorePosition != position) {
-            if (NetworkUtils.isNetAvailable) {
+            if (Util.isNetAvailable) {
                 calledLoadMorePosition = position
                 loadMore(position)
             } else {
-                context.toast(R.string.no_internet_connection)
+                Toast.makeText(context, "No Internet", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -57,12 +61,11 @@ abstract class PagedAdapter<T>(
     }
 
     open fun getLoadingViewHolder(parent: ViewGroup, context: Context): LoadingViewHolder {
-        val convertView = LayoutInflater.from(context).inflate(R.layout.loading_view, parent, false)
+        val convertView = LayoutInflater.from(context).inflate(R.layout.loader_view, parent, false)
         return LoadingViewHolder(convertView, context, this)
     }
 
-    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GeneralViewHolder {
-        log = "onCreateViewHolder: $viewType"
+    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == TYPE_LOADER) {
             getLoadingViewHolder(parent, context)
         } else {
@@ -70,8 +73,7 @@ abstract class PagedAdapter<T>(
         }
     }
 
-    final override fun onBindViewHolder(holder: GeneralViewHolder, position: Int) {
-        log = "onBindViewHolder: ${holder::javaClass.name}, hasNextPage:$hasNextPage, position: $position, itemCount - (prefetchTriggerCount + 1): ${itemCount - (prefetchTriggerCount + 1)}, itemCount: $itemCount"
+    final override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is LoadingViewHolder) {
             holder.onBind()
         } else {
@@ -117,7 +119,7 @@ abstract class PagedAdapter<T>(
                     } else if (isOldPositionALoader || isNewPositionALoader) {
                         return false
                     } else {
-                        pagedDiffCallback.areItemsTheSame(list[oldItemPosition], updatedList[newItemPosition])
+                        diffCallback.areItemsTheSame(list[oldItemPosition], updatedList[newItemPosition])
                     }
                 }
 
@@ -130,7 +132,7 @@ abstract class PagedAdapter<T>(
 //                    } else if (isOldPositionALoader || isNewPositionALoader) {
 //                        return false  // it won't happen since we have already returned false for this case in areItemsTheSame method
 //                    }
-                    return pagedDiffCallback.areContentsTheSame(list[oldItemPosition], updatedList[newItemPosition])
+                    return diffCallback.areContentsTheSame(list[oldItemPosition], updatedList[newItemPosition])
                 }
 
                 override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
@@ -145,7 +147,7 @@ abstract class PagedAdapter<T>(
 //                    else if (isOldPositionALoader && isNewPositionALoader) {
 //                        "dummy_payload_to_disable_fade_animation"
 //                    }
-                    return pagedDiffCallback.getChangePayload(list[oldItemPosition], updatedList[newItemPosition])
+                    return diffCallback.getChangePayload(list[oldItemPosition], updatedList[newItemPosition])
                 }
             }
             val result = DiffUtil.calculateDiff(diffCallbackWithLoader)
@@ -160,26 +162,16 @@ abstract class PagedAdapter<T>(
     }
 }
 
-abstract class PagedDiffCallback<T> {
-    abstract fun areItemsTheSame(oldItem: T, newItem: T): Boolean
-
-    abstract fun areContentsTheSame(oldItem: T, newItem: T): Boolean
-
-    fun getChangePayload(oldItem: T, newItem: T): Any? {
-        return null
-    }
-}
-
 class LoadingViewHolder(itemView: View,
                         private val context: Context,
-                        private val pagedAdapter: PagedAdapter<*>) : ViewHolder(itemView) {
+                        private val pagedAdapter: PagedAdapter<*>) : RecyclerView.ViewHolder(itemView) {
     private val progressBar: ProgressBar = itemView.findViewById(R.id.progressBar)
     private val retryTextView: AppCompatTextView = itemView.findViewById(R.id.textViewRetry)
 
     init
     {
         retryTextView.setOnClickListener {
-            if (NetworkUtils.isNetAvailable())
+            if (Util.isNetAvailable)
             {
                 retryTextView.visibility = View.GONE
                 progressBar.visibility = View.VISIBLE
@@ -187,13 +179,13 @@ class LoadingViewHolder(itemView: View,
             }
             else
             {
-                context.toast(R.string.no_internet_connection)
+                Toast.makeText(context, "No Internet", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     fun onBind() {
-        if (NetworkUtils.isNetAvailable())
+        if (Util.isNetAvailable)
         {
             retryTextView.visibility = View.GONE
             progressBar.visibility = View.VISIBLE
@@ -203,7 +195,7 @@ class LoadingViewHolder(itemView: View,
         {
             retryTextView.visibility = View.VISIBLE
             progressBar.visibility = View.GONE
-            context.toast(R.string.no_internet_connection)
+            Toast.makeText(context, "No Internet", Toast.LENGTH_SHORT).show()
         }
 
         with(itemView.layoutParams) {
