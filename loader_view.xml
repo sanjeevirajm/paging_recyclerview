@@ -15,14 +15,14 @@
         android:layout_height="wrap_content"
         android:textSize="18sp"
         android:textColor="@android:color/black"
-        android:text="@string/retry"/>
+        android:text="Retry"/>
 
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:visibility="visible"
-        android:indeterminateTint="@android:color/Black"
+        android:indeterminateTint="@android:color/black"
         android:indeterminate="false" />
 
 </LinearLayout>
