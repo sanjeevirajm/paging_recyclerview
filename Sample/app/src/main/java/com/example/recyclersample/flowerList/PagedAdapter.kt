@@ -119,7 +119,7 @@ abstract class PagedAdapter<T>(
                     } else if (isOldPositionALoader || isNewPositionALoader) {
                         return false
                     } else {
-                        diffCallback.areItemsTheSame(list[oldItemPosition], updatedList[newItemPosition])
+                        diffCallback.areItemsTheSame(list[oldItemPosition]!!, updatedList[newItemPosition]!!)
                     }
                 }
 
@@ -132,7 +132,7 @@ abstract class PagedAdapter<T>(
 //                    } else if (isOldPositionALoader || isNewPositionALoader) {
 //                        return false  // it won't happen since we have already returned false for this case in areItemsTheSame method
 //                    }
-                    return diffCallback.areContentsTheSame(list[oldItemPosition], updatedList[newItemPosition])
+                    return diffCallback.areContentsTheSame(list[oldItemPosition]!!, updatedList[newItemPosition]!!)
                 }
 
                 override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
@@ -147,7 +147,7 @@ abstract class PagedAdapter<T>(
 //                    else if (isOldPositionALoader && isNewPositionALoader) {
 //                        "dummy_payload_to_disable_fade_animation"
 //                    }
-                    return diffCallback.getChangePayload(list[oldItemPosition], updatedList[newItemPosition])
+                    return diffCallback.getChangePayload(list[oldItemPosition]!!, updatedList[newItemPosition]!!)
                 }
             }
             val result = DiffUtil.calculateDiff(diffCallbackWithLoader)
