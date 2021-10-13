@@ -37,8 +37,6 @@ abstract class PagedAdapter<T>(
             if (Util.isNetAvailable) {
                 calledLoadMorePosition = position
                 loadMore(position)
-            } else {
-                Toast.makeText(context, "No Internet", Toast.LENGTH_SHORT).show()
             }
         }
     }
