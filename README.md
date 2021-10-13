@@ -29,7 +29,7 @@ It has the same concern mentioned above. Another new concern is that adding pre-
 
 The only disadvantage is it's super complex. It might be useful if the list is huge.
 
-5. PagedAdapter
+5. PagedAdapter (present in this repo)
 
 *It does pre fetching, and it can be customised. And the pre-fetching trigger technique is better than Android's Paging library.
 
